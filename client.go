@@ -442,20 +442,20 @@ type RequestItem struct {
 	Seconds string
 
 	// Billing address for transaction
-	Address Address
+	Address *Address
 
 	// P2P address for transaction
-	P2PAddress Address
+	P2PAddress *Address
 
 	// Ship To Address
-	ShipToAddress Address `json:",omitempty"`
+	ShipToAddress *Address `json:",omitempty"`
 
 	// Ship From Address
-	ShipFromAddress Address `json:",omitempty"`
+	ShipFromAddress *Address `json:",omitempty"`
 
-	OrderPlacementAddress Address `json:",omitempty"`
+	OrderPlacementAddress *Address `json:",omitempty"`
 
-	OrderApprovalAddress Address `json:",omitempty"`
+	OrderApprovalAddress *Address `json:",omitempty"`
 }
 
 type Address struct {
