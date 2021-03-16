@@ -1,14 +1,14 @@
 package suretax
 
 import (
-	"net/http"
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"sync"
 	"time"
-	)
+)
 
 type HttpClient interface {
 	Do(req *http.Request) (*http.Response, error)
@@ -224,7 +224,7 @@ type Request struct {
 	ClientNumber string
 
 	// Client’s Business Unit. Value for this field is not required. Max Len: 20
-	BusinessUnit string
+	BusinessUnit string `json:",omitempty"`
 
 	// Validation Key provided by CCH SureTax. Required for client access to API function. Max Len: 36
 	ValidationKey string
@@ -253,7 +253,7 @@ type Request struct {
 
 	// Field for client transaction tracking. This value will be provided in the response data. Value for this field is not required, but preferred.
 	// Max Len: 100
-	ClientTracking string
+	ClientTracking string `json:",omitempty"`
 
 	// Required. Determines how taxes are grouped for the response. Values:
 	// 00 – Tax grouped by Line Item
@@ -270,7 +270,10 @@ type Request struct {
 
 	// Optional value. A unique value provided by client for transaction audit purposes.
 	// Max Len: 16
-	STAN string
+	STAN string `json:",omitempty"`
+
+	// Optional value. Field used to modify previously ran transaction. To use this feature Transaction should be in In-Progress state with a ReturnFileCode of T
+	MasterTransId string `json:",omitempty"`
 
 	ItemList []RequestItem
 }
@@ -280,7 +283,7 @@ type RequestItem struct {
 	LineNumber string
 
 	// Used for tax aggregation by Invoice. Must be alphanumeric. Max Len: 40
-	InvoiceNumber string
+	InvoiceNumber string `json:",omitempty"`
 
 	// Used for tax aggregation by Customer. Must be alphanumeric. Max Len: 40
 	CustomerNumber string
@@ -292,16 +295,16 @@ type RequestItem struct {
 	TermNumber string
 
 	// Required when using Tax Situs Rule 01 or 02. Format: NPANXXNNNN
-	BillToNumber string
+	BillToNumber string `json:",omitempty"`
 
 	// Required. Date of transaction. Valid date formats include: MM/DD/YYYY, MM-DD-YYYY, YYYY-MM-DDTHH:MM:SS
 	TransDate string
 
 	// Optional. Billing Period Start Date
-	BillingPeriodStartDate string
+	BillingPeriodStartDate string `json:",omitempty"`
 
 	// Optional. Billing Period End Date
-	BillingPeriodEndDate string
+	BillingPeriodEndDate string `json:",omitempty"`
 
 	// Required. Format: $$$$$$$$$.CCCC
 	// For Negative charges, the first position should have a minus (-) indicator.
@@ -349,68 +352,91 @@ type RequestItem struct {
 	// Required. Tax Exemption to be applied to this item only.
 	TaxExemptionCodeList []string
 
-	// Required. Tax Exemption reason value.
-	ExemptReasonCode string
+	// Used only if you are adding exemption certificate information into the system
+	ExemptReasonCode string `json:",omitempty"`
+
+	// Use to supply "follow along" revenue items (such as freight) that adhere to the same taxability application as the source revenue for the transaction.
+	AuxRevenue string `json:",omitempty"`
+
+	// 01 - Freight
+	AuxRevenueType string `json:",omitempty"`
+
+	// D - Destination | O-Origination
+	FreightOnBoard string `json:",omitempty"`
+
+	// 1 - Yes | 0-No
+	ShipFromPOB string `json:",omitempty"`
+
+	// 	1 - Yes (default) | 0 - No
+	CommonCarrier string `json:",omitempty"`
+
+	// Determines whether Default Tax Logic, Sales Tax, Sellers Use Tax or Consumers Use Tax is calculated.
+	// Values:
+	// 0 - Default Tax Logic
+	// 1 - Return only Sales Tax
+	// 2 - Return only Sellers Use Tax
+	// 3 - Consumers Use Tax
+	RuleOverride string `json:",omitempty"`
 
 	// Optional. Field for client use at the item level. This value is not returned in the response, but is available for use in reports and extracts.
 	// Max Len: 100
-	UDF string
+	UDF string `json:",omitempty"`
 
 	// Optional. Field for client use at the item level. This value is not returned in the response, but is available for use in reports and extracts.
 	// Max Len: 100
-	UDF2 string
+	UDF2 string `json:",omitempty"`
 
 	// Optional. Available for use in the rules engine.
-	CostCenter string
+	CostCenter string `json:",omitempty"`
 
 	// Optional. Available for use in the rules engine. Max Len: 25 Alphanumeric
-	GLAccount string
+	GLAccount string `json:",omitempty"`
 
 	// Optional. Available for use in the rules engine. Max Len: 25 Alphanumeric
-	MaterialGroup string
+	MaterialGroup string `json:",omitempty"`
 
 	// Optional. Billing Days in Period.
-	BillingDaysInPeriod string
+	BillingDaysInPeriod string `json:",omitempty"`
 
 	// Optional. Origin Country Code
-	OriginCountryCode string
+	OriginCountryCode string `json:",omitempty"`
 
 	// Optional. Destination Country Code
-	DestCountryCode string
+	DestCountryCode string `json:",omitempty"`
 
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter1 string
+	Parameter1 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter2 string
+	Parameter2 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter3 string
+	Parameter3 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter4 string
+	Parameter4 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter5 string
+	Parameter5 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter6 string
+	Parameter6 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter7 string
+	Parameter7 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter8 string
+	Parameter8 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter9 string
+	Parameter9 string `json:",omitempty"`
 	// Optional, user defined field. Available for use in the rules engine.
 	// Max Len: 25 Alphanumeric
-	Parameter10 string
+	Parameter10 string `json:",omitempty"`
 
 	// Optional. Currency code based on ISO standard. As reference - http://www.xe.com/iso4217.php
-	CurrencyCode string
+	CurrencyCode string `json:",omitempty"`
 
 	// Required. Duration of call in seconds. Format 99999. Default should be 1.
 	Seconds string
@@ -419,70 +445,46 @@ type RequestItem struct {
 	Address Address
 
 	// P2P address for transaction
-	P2PAddress P2PAddress
+	P2PAddress Address
+
+	// Ship To Address
+	ShipToAddress Address `json:",omitempty"`
+
+	// Ship From Address
+	ShipFromAddress Address `json:",omitempty"`
+
+	OrderPlacementAddress Address `json:",omitempty"`
+
+	OrderApprovalAddress Address `json:",omitempty"`
 }
 
 type Address struct {
 	// Address Line 1
-	PrimaryAddressLine string
+	PrimaryAddressLine string `json:",omitempty"`
 
 	// Address Line 2
-	SecondaryAddressLine string
+	SecondaryAddressLine string `json:",omitempty"`
 
 	// County
-	County string
+	County string `json:",omitempty"`
 
 	// City
-	City string
+	City string `json:",omitempty"`
 
 	// State – full state name or two-character abbreviation accepted
-	State string
+	State string `json:",omitempty"`
 
 	// Zip code or Canadian postal code
 	PostalCode string
 
 	// Zip+4
-	Plus4 string
+	Plus4 string `json:",omitempty"`
 
 	// International country ISO code value in format: XX
-	Country string
+	Country string `json:",omitempty"`
 
 	// Optional value. If provided, the CCH Geocode will take precedence and will be used instead of the address / zip+4 information.
-	Geocode string
-
-	// Required. If selected, SureAddress will validate address and update the zip+4.
-	// 0 – No (default)
-	// 1 – Yes
-	VerifyAddress string
-}
-
-type P2PAddress struct {
-	// Address Line 1
-	PrimaryAddressLine string
-
-	// Address Line 2
-	SecondaryAddressLine string
-
-	// County
-	County string
-
-	// City
-	City string
-
-	// State – full state name or two-character abbreviation accepted
-	State string
-
-	// Zip code or Canadian postal code
-	PostalCode string
-
-	// Zip+4
-	Plus4 string
-
-	// International country ISO code value in format: XX
-	Country string
-
-	// Optional value. If provided, the CCH Geocode will take precedence and will be used instead of the address / zip+4 information.
-	Geocode string
+	Geocode string `json:",omitempty"`
 
 	// Required. If selected, SureAddress will validate address and update the zip+4.
 	// 0 – No (default)
