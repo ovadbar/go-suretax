@@ -1,13 +1,13 @@
 package suretax
 
 import (
-	"testing"
 	"bytes"
-	"os"
-	"net/http"
 	"io/ioutil"
+	"net/http"
+	"os"
 	"sync"
-	)
+	"testing"
+)
 
 var testCli = SuretaxClient{"", "", sync.Mutex{}, nil}
 
@@ -176,7 +176,7 @@ func getTestRequest() *Request {
 	addr := Address{}
 	addr.VerifyAddress = "false"
 
-	p2pAddress := P2PAddress{}
+	p2pAddress := Address{}
 	p2pAddress.VerifyAddress = "false"
 
 	item.Address = addr
