@@ -276,6 +276,9 @@ type Request struct {
 	MasterTransId string `json:",omitempty"`
 
 	ItemList []RequestItem
+
+	// Billing address for transaction
+	Address *Address `json:",omitempty"`
 }
 
 type RequestItem struct {
@@ -442,7 +445,7 @@ type RequestItem struct {
 	Seconds string
 
 	// Billing address for transaction
-	Address *Address
+	BillingAddress *Address `json:",omitempty"`
 
 	// P2P address for transaction
 	P2PAddress *Address
